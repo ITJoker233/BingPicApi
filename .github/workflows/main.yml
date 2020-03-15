@@ -1,0 +1,41 @@
+name: 'GitHub Actions BingPicApi'
+
+on:
+  push:
+    branches: 
+      - master
+  schedule:
+    - cron: '0 16 * * *'
+jobs:
+  Bing-spider:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: 'Set up Python'
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+      - name: 'Install dependencies'
+        run: python -m pip install --upgrade pip
+      - name: 'Install requirements'
+        run: pip install -r ./requirements.txt
+      - name: 'Working'
+        timeout-minutes: 350
+        run: bash ./main.sh
+      - name: Commit files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add -A
+          git commit -m "?? add a BingPic" -a
+      - name: 'Push changes'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.TOKEN }}
+      - name: 'Create a Release'
+        uses: elgohr/Github-Release-Action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          args: BingImage
